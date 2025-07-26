@@ -1,16 +1,48 @@
 import React, { useState } from 'react';
 import { MapPin, Plus, AlertTriangle } from 'lucide-react';
-import TrafficMap from '@/components/TrafficMap';
+import TrafficMapWithGPS from '@/components/TrafficMapWithGPS';
 import ReportTrafficForm from '@/components/ReportTrafficForm';
 import AdminDashboard from '@/components/AdminDashboard';
 import ProfileView from '@/components/ProfileView';
 import Navigation from '@/components/Navigation';
+import LoginForm from '@/components/auth/LoginForm';
+import SignupForm from '@/components/auth/SignupForm';
+import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
 const Index = () => {
   const [currentView, setCurrentView] = useState('map');
   const [showReportForm, setShowReportForm] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | 'forgot' | null>('login');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<{name: string, email: string, role?: string} | null>(null);
+
+  // Auth handlers (will connect to Supabase later)
+  const handleLogin = async (email: string, password: string) => {
+    // Mock login - replace with Supabase auth
+    setUser({ name: 'Test User', email, role: 'user' });
+    setIsAuthenticated(true);
+    setAuthMode(null);
+  };
+
+  const handleSignup = async (name: string, email: string, password: string) => {
+    // Mock signup - replace with Supabase auth
+    setUser({ name, email, role: 'user' });
+    setIsAuthenticated(true);
+    setAuthMode(null);
+  };
+
+  const handleForgotPassword = async (email: string) => {
+    // Mock password reset - replace with Supabase auth
+    console.log('Password reset for:', email);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setIsAuthenticated(false);
+    setCurrentView('map');
+  };
 
   const renderContent = () => {
     switch (currentView) {
@@ -50,7 +82,7 @@ const Index = () => {
             </Card>
 
             {/* Traffic Map */}
-            <TrafficMap />
+            <TrafficMapWithGPS onReportTraffic={() => setShowReportForm(true)} />
 
             {/* Recent Alerts */}
             <Card>
@@ -86,15 +118,49 @@ const Index = () => {
       case 'profile':
         return <ProfileView />;
       default:
-        return <TrafficMap />;
+        return <TrafficMapWithGPS onReportTraffic={() => setShowReportForm(true)} />;
     }
   };
+
+  // Show auth forms if not authenticated
+  if (!isAuthenticated) {
+    if (authMode === 'login') {
+      return (
+        <LoginForm
+          onLogin={handleLogin}
+          onSwitchToSignup={() => setAuthMode('signup')}
+          onForgotPassword={() => setAuthMode('forgot')}
+        />
+      );
+    }
+    if (authMode === 'signup') {
+      return (
+        <SignupForm
+          onSignup={handleSignup}
+          onSwitchToLogin={() => setAuthMode('login')}
+        />
+      );
+    }
+    if (authMode === 'forgot') {
+      return (
+        <ForgotPasswordForm
+          onResetPassword={handleForgotPassword}
+          onBackToLogin={() => setAuthMode('login')}
+        />
+      );
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <div className="flex flex-col md:flex-row">
         {/* Desktop Sidebar / Mobile Bottom Navigation */}
-        <Navigation currentView={currentView} onViewChange={setCurrentView} />
+        <Navigation 
+          currentView={currentView} 
+          onViewChange={setCurrentView}
+          user={user}
+          onLogout={handleLogout}
+        />
         
         {/* Main Content */}
         <main className="flex-1 p-4 pb-20 md:pb-4 md:p-6">

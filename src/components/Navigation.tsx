@@ -1,13 +1,15 @@
 import React from 'react';
-import { MapPin, Plus, Shield, User, Menu } from 'lucide-react';
+import { MapPin, Plus, Shield, User, Menu, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface NavigationProps {
   currentView: string;
   onViewChange: (view: string) => void;
+  user?: {name: string, email: string, role?: string} | null;
+  onLogout?: () => void;
 }
 
-const Navigation = ({ currentView, onViewChange }: NavigationProps) => {
+const Navigation = ({ currentView, onViewChange, user, onLogout }: NavigationProps) => {
   const navItems = [
     { id: 'map', label: 'Map', icon: MapPin },
     { id: 'report', label: 'Report', icon: Plus },
@@ -30,6 +32,19 @@ const Navigation = ({ currentView, onViewChange }: NavigationProps) => {
             </div>
           </div>
         </div>
+
+        {/* User info - Desktop only */}
+        {user && (
+          <div className="hidden md:block mb-4 border rounded-lg p-3 bg-muted/50">
+            <p className="font-medium text-sm">{user.name}</p>
+            <p className="text-xs text-muted-foreground">{user.email}</p>
+            {user.role === 'admin' && (
+              <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full mt-1 inline-block">
+                Admin
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Navigation Items */}
         <div className="flex md:flex-col flex-1 justify-around md:justify-start md:space-y-2">
@@ -56,6 +71,20 @@ const Navigation = ({ currentView, onViewChange }: NavigationProps) => {
             );
           })}
         </div>
+
+        {/* Logout button - Desktop only */}
+        {onLogout && (
+          <div className="hidden md:block mt-4">
+            <Button
+              onClick={onLogout}
+              variant="outline"
+              className="w-full justify-start gap-3"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </div>
+        )}
 
         {/* Desktop Menu Footer */}
         <div className="hidden md:block mt-auto pt-4">
